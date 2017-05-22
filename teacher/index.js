@@ -11,10 +11,10 @@ var fs = require('fs');
 var app = express();
 
 app.use(cookieParser('wsj'));    
-/*
+
 app.set('views',path.join(__dirname,'views'));
 app.set('view engine','ejs');
-*/
+
 app.use(express.static(path.join(__dirname,'public')));
 
 app.use(bodyParser.json());
@@ -30,13 +30,14 @@ app.use(session({
 
 
 app.get('/',function(req,res){
-    if(req.session.user)
+    if(req.session.user)     
        return res.redirect('/user'); 
     var code = req.query.code;
         request('https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token='+getToken().access_token+'&code=' + code, function(err, ress, data){
            if(!JSON.parse(data).errcode){
              req.session.user = JSON.parse(data);       
            return res.redirect('/user');  
+                 
            }   
            else{
 
@@ -48,7 +49,7 @@ app.get('/',function(req,res){
 
 app.get('/user',function(req,res){
        console.log(req.session.user);
-       res.send('hello');
+       res.render('student',{});
    });
 
 function getToken(){
