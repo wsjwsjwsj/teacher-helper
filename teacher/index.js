@@ -65,19 +65,37 @@ function getTeacherInfo(teacherid, token, res){
       
 }
 
-function getStudentInfo(){
-
+function getStudentInfo(teacherid, token, res){
+	process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+    request('https://api.mysspku.com/index.php/V2/TeacherInfo/getStudents?teacherid='+teacherid+'&token='+token, function(err, ress, data){
+		var students;
+		if(err)
+			console.log(err);
+        var result = JSON.parse(data);
+        if(result.errcode == 0){
+        	students = result.data.students;
+        	//console.log(students);
+        	res.render('student',{
+        			students: students
+        		}); 
+        }    
+    });  
 }
 
 app.get('/student',function(req,res){
-    if(req.session.user)     
-        res.render('student',{});
+    if(req.session.user){
+    	console.log(req.session.user);
+    	req.session.user.UserId = '12154545';
+    	getStudentInfo(req.session.user.UserId, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', res);
+    }     
     else{ 
     	var code = req.query.code;
         request('https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token='+getToken().access_token+'&code=' + code, function(err, ress, data){
             if(!JSON.parse(data).errcode){
                 req.session.user = JSON.parse(data);       
-            res.render('student',{});  
+                console.log(req.session.user);
+                req.session.user.UserId = '12154545'; 
+                getStudentInfo(req.session.user.UserId, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', res);
             }   
            else{
            }
@@ -108,7 +126,6 @@ app.get('/teacher',function(req,res){
         }
 
    });
-
 
 app.listen(3000,function(req,res){
        console.log("app is running at port 3000");
