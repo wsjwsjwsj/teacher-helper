@@ -110,18 +110,17 @@
 	</div>
 
 	<script type="text/javascript">
-		var stu = '<%- JSON.stringify(students)%>';            //获取后端传的学生数据
+		var stu = '<%- JSON.stringify(students)%>';
 		var students = JSON.parse(stu);
         var datas = [];
 		var grade = [];
 	    var gender = '';
 
-        //借助js中的正则表达式来实现学号和姓名的模糊搜索
-        function inputChange(id){
+        function inputChange(id){   //正则表达式处理students返回是筛选过后的datas
 			var inputValue = $('#' + id).val();
             if(inputValue != ''){
 				inputValue = inputValue.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
-				var matcher = new RegExp(inputValue, "i");
+				var matcher = new RegExp(inputValue, "i");  //i区分大小写
 				if(id == 'nameInput'){
 					datas = $.grep(students, function(value) {
 						return matcher.test(value.name) || matcher.test(value.pinyin);
@@ -136,23 +135,22 @@
 			}
 
 			if(inputValue != '' && datas.length == 0){
-				$('#studentList').hide();
+				$('#studentList').hide();  //找不到就隐藏下面的列表
 			}else{
 				retrSocores(grade, gender);
 			}
 		}
 
-        
 		function changeAddrStyle(obj){     
 			var id = obj.id;
 			if(id>0 && id<=15){
 				if(!$(obj).hasClass("am-primary")){
-					$(obj).addClass("am-primary"); 
+					$(obj).addClass("am-primary");   //点一下加进来
 					grade.push(obj.abbr);
 		      	}else{  
 		      		$(obj).removeClass("am-primary"); 
-		      		grade=$.grep(grade,function(n, i){
-                    	return n != obj.abbr;
+		      		grade=$.grep(grade,function(n, i){   //再点一下删掉
+                    	return n != obj.abbr;  //return后面的东西是grep过滤后留下的
 					});       	   
 		        }
 			}else if(id>15 && id<=19){
@@ -168,11 +166,10 @@
 				});
 		    }
 			
-			$("#title").html(grade.sort().join(",") + " " +gender + " 学生");
+			$("#title").html(grade.sort().join(",") + " " +gender + " 学生"); //页面显示当前的筛选条件
 			retrSocores(grade, gender);
 	    }
 
-        //在页面展示学生列表
 		function retrSocores(grade, gender) {
 			var $studentList = $('#studentList');
 			$studentList.hide();
@@ -219,7 +216,6 @@
 			}
 		}
 		
-		//当点击某一学生时，通过ajax将学号传入后端，将get到的数据进行显示
 		function showDetail(id){
 			var $clickedBtn = $("#detailBtn_"+id);
 			var $detailInfo = document.getElementById("xh_"+id);
@@ -231,8 +227,8 @@
              			type: "GET",
            				url: "student/:"+id,
            				dataType: "json",
-           				success: function(data){
-           					if($detailInfo.style.display == "none"){
+           				success: function(data){  //index.js传来了学生的详细信息在data里
+           					if($detailInfo.style.display == "none"){    //第一次按的时候箭头朝下展开详细信息，再按就朝上收起详细信息，
 								$clickedBtn.attr("class","am-icon-chevron-up");
 								$detailInfo.style.display = "";
 							}else{
@@ -291,6 +287,15 @@
 							sb += "<div class=\"am-gallery-desc\"><label><small>所属行业</small></label>&nbsp;&nbsp;<span><small>"+data.job.industry + "</small></span></div>";
 							sb += "<div class=\"am-gallery-desc\"><label><small>薪资水平</small></label>&nbsp;&nbsp;<span><small>"+data.job.salary +"</small></span></div>";
 			
+			                sb += "<hr /><div class=\"am-gallery-desc\"><label>家庭信息：</label>&nbsp;&nbsp;</div>";
+							sb += "<div class=\"am-gallery-desc\"><label><small>父亲姓名</small></label>&nbsp;&nbsp;<span><small>"+data.family.familyname1 +"</small></span></div>";
+							sb += "<div class=\"am-gallery-desc\"><label><small>父亲电话</small></label>&nbsp;&nbsp;<span><small>"+data.family.familyphone1 + "</small></span></div>";
+							sb += "<div class=\"am-gallery-desc\"><label><small>母亲姓名</small></label>&nbsp;&nbsp;<span><small>"+data.family.familyname2 +"</small></span></div>";
+							sb += "<div class=\"am-gallery-desc\"><label><small>母亲电话</small></label>&nbsp;&nbsp;<span><small>"+data.family.familyphone2 +"</small></span></div>";
+							sb += "<div class=\"am-gallery-desc\"><label><small>紧急联系人姓名</small></label>&nbsp;&nbsp;<span><small>"+data.family.emergencyname + "</small></span></div>";
+							sb += "<div class=\"am-gallery-desc\"><label><small>紧急联系人电话</small></label>&nbsp;&nbsp;<span><small>"+data.family.emergencyphone +"</small></span></div>";
+			
+			
 							sb += "</div>";    		
                             $detailInfo.innerHTML=sb;
  
@@ -298,16 +303,7 @@
          				});
 					});
 				          			    
-            /*
-				if("none" == $detailInfo[0].style.display){
-					alert("change");
-					$clickedBtn.attr("class","am-icon-chevron-up");
-					$detailInfo[0].style.display = "block";
-				}else{
-					$clickedBtn.attr("class","am-icon-chevron-down");
-					$detailInfo[0].style.display = "none";
-				}
-		    */
+        
 		}
 		$(function() {
 			retrSocores(grade, gender);
